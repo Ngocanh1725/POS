@@ -1,5 +1,6 @@
 ﻿using POS.DAL;
 using POS.MODEL;
+using POS.UTIL; // Thêm namespace UTIL
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,13 +25,17 @@ namespace POS.BLL
             {
                 return null; // Không tồn tại người dùng            
             }
-            if (password == user.PasswordHash)
+
+            // **CẬP NHẬT QUAN TRỌNG VỀ BẢO MẬT**
+            // Không bao giờ so sánh mật khẩu trực tiếp.
+            // Sử dụng PasswordHasher để xác minh.
+            if (PasswordHasher.VerifyPassword(password, user.PasswordHash))
             {
-                return user;
+                return user; // Mật khẩu khớp
             }
             else
             {
-                return null;
+                return null; // Mật khẩu sai
             }
         }
     }

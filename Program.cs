@@ -1,4 +1,4 @@
-using POS.UI;
+﻿using POS.UI;
 
 namespace POS
 {

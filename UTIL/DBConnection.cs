@@ -4,13 +4,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace POS.UTIL
 {
     public static class DBConnection
     {
-        public static string connectionString = @"Data Source=ADMIN-PC;Initial Catalog=POS;Integrated Security=True;TrustServerCertificate=True;Connect Timeout = 30"; // Chuỗi kết nối
+        // **QUAN TRỌNG: Sửa chuỗi kết nối này cho đúng với máy chủ SQL của bạn!**
+        // Data Source=ADMIN-PC: Tên máy chủ SQL của bạn.
+        // Initial Catalog=POS: Tên CSDL.
+        // Integrated Security=True: Dùng tài khoản Windows.
+        // (Nếu dùng tài khoản SQL, bạn cần thêm User ID và Password)
+        public static string connectionString = @"Data Source=ADMIN-PC;Initial Catalog=POS;Integrated Security=True;TrustServerCertificate=True;Connect Timeout=30"; // Chuỗi kết nối
+
         public static SqlConnection GetConnection()
         {
             try
@@ -20,7 +25,27 @@ namespace POS.UTIL
             }
             catch (Exception ex)
             {
-                throw new Exception("Lỗi kết nối đến csdl: \n" +  ex.Message);
+                throw new Exception("Lỗi kết nối đến CSDL (DBConnection): \n" + ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Phương thức mới: Kiểm tra kết nối đến CSDL
+        /// </summary>
+        /// <returns>True nếu kết nối thành công, False nếu thất bại.</returns>
+        public static bool CheckConnection()
+        {
+            using (SqlConnection connection = GetConnection())
+            {
+                try
+                {
+                    connection.Open();
+                    return true; // Kết nối thành công
+                }
+                catch (Exception)
+                {
+                    return false; // Kết nối thất bại
+                }
             }
         }
     }

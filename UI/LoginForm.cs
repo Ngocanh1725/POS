@@ -20,11 +20,17 @@ namespace POS.UI
             InitializeComponent();
             _userService = new UserService();
 
+            // Chấp nhận nút Enter
+            this.AcceptButton = cmdLogin;
+            // Chấp nhận nút Escape
+            this.CancelButton = cmdCancel;
+            // Dùng PasswordChar
+            txtPassword.PasswordChar = '•';
         }
 
         private void cmdCancel_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Application.Exit(); // Thoát hoàn toàn ứng dụng
         }
 
         private void cmdLogin_Click(object sender, EventArgs e)
@@ -33,36 +39,40 @@ namespace POS.UI
             string password = txtPassword.Text.Trim();
             if (string.IsNullOrEmpty(username))
             {
-                MessageBox.Show("Tên không được để trống");
+                MessageBox.Show("Tên truy cập không được để trống", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtUsername.Focus();
                 return;
             }
             if (string.IsNullOrEmpty(password))
             {
-                MessageBox.Show("Mật khẩu không được để trống");
+                MessageBox.Show("Mật khẩu không được để trống", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtPassword.Focus();
                 return;
-            }    
+            }
             try
             {
                 User authenticatedUser = _userService.AuthenticatedUser(username, password);
                 if (authenticatedUser != null)
                 {
-                    MessageBox.Show("Chào mừng " + authenticatedUser.FullName + "! đăng nhập thành công");
-                    new Form1().Show();
-                    this.Hide();
+                    MessageBox.Show("Chào mừng " + authenticatedUser.FullName + "! Đăng nhập thành công.", "Đăng nhập thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                    // **THAY ĐỔI**
+                    // Mở MainForm và truyền thông tin người dùng vào
+                    MainForm mainForm = new MainForm(authenticatedUser);
+                    mainForm.Show(); // Hiển thị form chính
+                    this.Hide(); // Ẩn form đăng nhập
                 }
                 else
                 {
-                    MessageBox.Show("Đăng nhập thất bại");
+                    MessageBox.Show("Tên truy cập hoặc mật khẩu không đúng.", "Đăng nhập thất bại", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     this.txtUsername.Focus();
                 }
             }
             catch (Exception ex)
             {
-                throw new Exception("Tên truy cập hoặc mật khẩu không đúng.");
+                // Hiển thị lỗi chi tiết hơn (ví dụ: không kết nối được CSDL)
+                MessageBox.Show("Đã xảy ra lỗi: " + ex.Message, "Lỗi nghiêm trọng", MessageBoxButtons.OK, MessageBoxIcon.Stop);
             }
-
         }
     }
 }

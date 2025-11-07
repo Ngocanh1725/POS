@@ -6,10 +6,15 @@ namespace POS.DAL
 {
     public class UserRepo
     {
-        public User GetUserByUserName(string username)
+        public User? GetUserByUserName(string username)
         {
-            User user = null;
-            string sql = @"SELECT u.UserID, u.Username, u.PasswordHash, u.FullName, u.RoleId, r.RoleName FROM Users u INNER JOIN Roles r ON u.RoleId = r.RoleId WHERE u.Username = @Username";
+            User? user = null;
+            // Câu lệnh SQL này phải khớp với các cột trong CSDL của bạn
+            string sql = @"
+                SELECT u.UserID, u.Username, u.PasswordHash, u.FullName, u.RoleId, r.RoleName 
+                FROM Users u 
+                INNER JOIN Roles r ON u.RoleId = r.RoleId 
+                WHERE u.Username = @Username";
 
             using (SqlConnection connection = DBConnection.GetConnection())
             {
@@ -38,10 +43,12 @@ namespace POS.DAL
                     }
                     catch (Exception ex)
                     {
-                        throw new Exception("Lỗi truy vấn người dùng: \n" + ex.Message);
+                        // Lỗi này rất quan trọng, nó sẽ cho bạn biết CSDL có kết nối được không
+                        throw new Exception("Lỗi truy vấn người dùng (UserRepo): \n" + ex.Message);
                     }
                 }
             }
+            // Nếu user == null, tức là không tìm thấy username
             return user;
         }
     }
