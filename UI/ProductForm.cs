@@ -29,16 +29,18 @@ namespace POS.UI
         {
             try
             {
-                List<Category> categories = _productService.GetCategories();
-                // Thêm một mục "Tất cả" để lọc
-                categories.Insert(0, new Category { CategoryId = 0, CategoryName = "-- Tất cả danh mục --" });
-
-                cboCategory.DataSource = categories;
+                // Tải danh sách gốc cho form SỬA
+                List<Category> editCategories = _productService.GetCategories();
+                cboCategory.DataSource = editCategories;
                 cboCategory.DisplayMember = "CategoryName";
                 cboCategory.ValueMember = "CategoryId";
 
-                // Tạo một bản sao cho ComboBox lọc
-                cboFilterCategory.DataSource = new List<Category>(categories);
+                // Tạo một danh sách MỚI cho bộ LỌC, bao gồm "-- Tất cả --"
+                List<Category> filterCategories = new List<Category>();
+                filterCategories.Add(new Category { CategoryId = 0, CategoryName = "-- Tất cả danh mục --" });
+                filterCategories.AddRange(editCategories); // Thêm danh sách gốc vào
+
+                cboFilterCategory.DataSource = filterCategories;
                 cboFilterCategory.DisplayMember = "CategoryName";
                 cboFilterCategory.ValueMember = "CategoryId";
             }
@@ -64,7 +66,19 @@ namespace POS.UI
         private void ApplyFilter()
         {
             string filterText = txtFilterName.Text.Trim().ToLower();
-            int filterCategory = (int)cboFilterCategory.SelectedValue;
+
+            // SỬA LỖI: Lấy giá trị từ ComboBox một cách an toàn
+            int filterCategory = 0;
+            if (cboFilterCategory.SelectedValue != null)
+            {
+                // Thử chuyển đổi sang int, vì SelectedValue có thể là object
+                // thay vì int (đặc biệt là khi form đang load)
+                bool success = int.TryParse(cboFilterCategory.SelectedValue.ToString(), out filterCategory);
+                if (!success)
+                {
+                    filterCategory = 0; // Nếu thất bại, coi như không lọc
+                }
+            }
 
             List<Product> filteredList = _productList;
 
@@ -154,7 +168,10 @@ namespace POS.UI
             numQuantity.Value = 0;
             if (cboCategory.Items.Count > 0)
             {
-                cboCategory.SelectedIndex = 1; // Chọn danh mục đầu tiên (bỏ qua "Tất cả")
+                // TỐI ƯU:
+                // Bây giờ cboCategory (sửa) không còn mục "Tất cả"
+                // nên chúng ta có thể an toàn chọn index 0
+                cboCategory.SelectedIndex = 0;
             }
             btnSave.Text = "Lưu (Thêm)";
             btnDelete.Enabled = false;
